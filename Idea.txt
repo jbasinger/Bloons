@@ -1,0 +1,52 @@
+Kid Mode
+--------
+Bloons drop randomly, hitting any key or clicking anywhere pops a random balloon.
+Add special bloons for super fun times!
+
+Regular Mode
+------------
+60s time limit.
+Bloons drop randomly, clicking a bloon pops it.
+Keep track of accuracy (clicks that pop a bloon, clicks that don't)
+Keep track of total clicks
+Keep track of total time
+Calculate clicks per min/sec
+
+Keep high scores?
+
+Popping special bloons do special things
+
+Good Bloons
+~~~~~~~~~~~
+Bloon Bomb: Blows up other bloons in a certain radius
+Add Time Bloon: Adds time to your blooning
+Time Warp Bloon: Slows down bloons dropping for a certain amount of time
+Anvil Bloon: Pops and an anvil drops, popping all bloons below it
+Bonus Bloon: Pops and shoots cool fireworks, is worth 5x points
+Bloon Bundle: Bloons strung together for easier popping.
+Beefy Bloon: Pops and increases size of bloons for a period of time.
+
+Bad bloons
+~~~~~~~~~~
+Puny Bloon: Pops and shrinks bloons for a certain amount of time.
+Heavy Bloon: Pops and makes other bloons heavy (fall faster) for a certain amount of time.
+Blackhole bloon: Pop it and it sucks up bloons around it so you can't pop them
+Toot Bloon: pop it and it makes a fart noise, small brown cloud and pushes other bloons out of it's radius
+
+Neutral Bloons
+~~~~~~~~~~~~~~
+Kitty Bloon: Pops and makes a meow sound.
+Weather Bloon: Pops and makes it snow.
+
+
+Ryan on Weather Bloons
+1:04:04 PM) Ryan Boutot: weather ballon dude!
+(1:04:11 PM) Ryan Boutot: 1/4 possibilities
+(1:04:15 PM) Ryan Boutot: 2 good
+(1:04:16 PM) Ryan Boutot: 2 bad
+(1:04:23 PM) Ryan Boutot: spring = rain
+(1:04:32 PM) Ryan Boutot: weighing down balloons
+(1:04:35 PM) Ryan Boutot: summer = sun
+(1:04:40 PM) Ryan Boutot: pops them
+(1:04:56 PM) Me: I was thinking just neutral, for some flavor
+(1:04:57 PM) Ryan Boutot: fall = wind, keeps them up in theair
