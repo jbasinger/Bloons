@@ -62,17 +62,26 @@ var game_init_state = {
 }
 
 var game_state = _.extend({},game_init_state);
-
 var bloons = [];
+var $canvas = $("#game");
+var stage = new createjs.Stage($canvas[0]);
 
 $(function(){
 	
-	var $canvas = $("#game");
-	var stage = new createjs.Stage($canvas[0]);
+	stage.snapToPixel = true;
+	
 	var menu = new createjs.Container().set({name: "menu"});
 	var board = new createjs.Container().set({name: "board"});
-
-	createjs.SceneManager.addScene(menu);
+	
+	configMenu(menu, $canvas);
+	configBoard(board, $canvas);
+	
+	createjs.SceneManager.addScene(menu, function(){
+		//Shown callback
+		stage.enableMouseOver();
+	}, function(){
+		stage.enableMouseOver(0);
+	});
 	createjs.SceneManager.addScene(board, function(){
 		//Shown callback
 		_.each(bloons,function(b){
@@ -84,13 +93,15 @@ $(function(){
 			b.tween.setPaused(true);
 		});
 	});
-
+	
 	window.addEventListener("keydown", function(e){
-		console.log(e);
-		if (e.keyCode == 80){
-			createjs.SceneManager.activeScene.name == "menu" ? createjs.SceneManager.showScene("board",stage) : createjs.SceneManager.showScene("menu",stage);
-			//createjs.SceneManager.showScene("board",stage);
+		
+		//console.log(e);
+		
+		if (e.keyCode == 27 && createjs.SceneManager.activeScene.name == "board" ){
+			createjs.SceneManager.showScene("menu",stage);
 		}
+
 		e.preventDefault();
 	});
 	
@@ -110,7 +121,7 @@ $(function(){
 	}, this);
 	
 	queue.on("complete", function(evt){
-		
+			
 		for (var i=0; i < MAX_BLOONS; i++){
 			
 			var bloon = new Bloon(BLOON_TYPE.NORMAL, $canvas, queue.getResult("bloon"), board);
@@ -123,9 +134,7 @@ $(function(){
 
 		}
 		
-		var text = new createjs.Text("Hello World", "20px Arial", "#ff7700").set({x: 100, y: 100});
-		menu.addChild(text);
-		createjs.SceneManager.showScene("board", stage);
+		createjs.SceneManager.showScene("menu", stage);
 		
 		createjs.Ticker.setFPS(60);
 		createjs.Ticker.addEventListener("tick",function(event){
@@ -144,6 +153,83 @@ function rand(min,max){ //Inclusive
 	return Math.random() * (max - min) + min;
 }
 
+function configMenu(menuContainer, $canvas){
+	
+	var title = new createjs.Text("BLOONS!", "bold 90px Arial", "#00FFFF").set({x: $canvas.width()/2, y: $canvas.height()/6.28});
+	title.set({regX: title.getMeasuredWidth()/2, regY: title.getMeasuredHeight()/2});
+	
+	var playMode = new createjs.Text("TIME MODE", "64px Arial", "#FF0000").set({x: $canvas.width()/2, y: title.y + 150});
+	playMode.set({regX: playMode.getMeasuredWidth()/2, regY: playMode.getMeasuredHeight()/2});
+	
+	var hit = new createjs.Shape();
+	hit.graphics.beginFill("#000").drawRect(0, 0, playMode.getMeasuredWidth(), playMode.getMeasuredHeight());
+	playMode.hitArea = hit;
+	
+	playMode.flippingOut = false;
+	
+	playMode.on("mouseover", function(evt){
+			playMode.flippingOut = true;
+	});
+	
+	playMode.on("mouseout", function(evt){
+		playMode.flippingOut = false;
+	});
+	
+	playMode.on("click", function(evt){
+		createjs.SceneManager.showScene("board", stage);
+	});
+	
+	var zenMode = new createjs.Text("ZEN MODE", "64px Arial", "#FF00FF").set({x: $canvas.width()/2, y: title.y + 250});
+	zenMode.set({regX: zenMode.getMeasuredWidth()/2, regY: zenMode.getMeasuredHeight()/2});
+	
+	//This could use some DRYing
+	var hit2 = new createjs.Shape();
+	hit2.graphics.beginFill("#000").drawRect(0, 0, zenMode.getMeasuredWidth(), zenMode.getMeasuredHeight());
+	zenMode.hitArea = hit2;
+	
+	zenMode.flippingOut = false;
+	
+	zenMode.on("mouseover", function(evt){
+			zenMode.flippingOut = true;
+	});
+	
+	zenMode.on("mouseout", function(evt){
+		zenMode.flippingOut = false;
+	});
+	
+	zenMode.on("click", function(evt){
+		//Change the mode here too.
+		createjs.SceneManager.showScene("board", stage);
+	});
+	
+	
+	createjs.Ticker.addEventListener("tick",function(evt){
+		if (playMode.flippingOut){
+			playMode.color = "#" + _.random(0,255).toString(16) + _.random(0,255).toString(16) + _.random(0,255).toString(16);
+		} else {
+			playMode.color = "#FF0000";
+		}
+		
+		if (zenMode.flippingOut){
+			zenMode.color = "#" + _.random(0,255).toString(16) + _.random(0,255).toString(16) + _.random(0,255).toString(16);
+		} else {
+			zenMode.color = "#FF0000";
+		}
+	});
+	
+	console.log(_.random(0,255).toString(16));
+	
+	menuContainer.addChild(title);
+	menuContainer.addChild(playMode);
+	menuContainer.addChild(zenMode);
+	
+	return menuContainer;
+}
+
+function configBoard(boardContainer, $canvas){
+	
+}
+
 var Bloon = function(type, $canvas, image, stage){
 	
 	var width = image.width;
@@ -153,11 +239,11 @@ var Bloon = function(type, $canvas, image, stage){
 		height: height,
 		width: width,
 		x: _.random(0, $canvas.width()-width),
-		y: _.random(-15*height, 0-height),
-		v: _.random(5000,10000)
+		y: _.random(-5*height, 0-height),
+		v: _.random(10000,15000)
 	});
 	
-	bloon.filters = [new createjs.ColorFilter(rand(),rand(),rand(),1,rand(0,255),rand(0,255),rand(0,255),0)];
+	bloon.filters = [new createjs.ColorFilter(0.25,0.25,0.25,1,rand(0,255),rand(0,255),rand(0,255),0)];
 	bloon.snapToPixel = true;
 	bloon.cache(0, 0, width, height);
 	
