@@ -103,7 +103,7 @@ var game_init_state = {
 	time: 60
 }
 
-var game_state = _.extend({},game_init_state);
+var game_state = _.extend({}, game_init_state);
 var bloons = [];
 var $canvas = $("#game");
 var stage = new createjs.Stage($canvas[0]);
@@ -116,8 +116,7 @@ $(function(){
 	
 	var menu = new createjs.Container().set({name: "menu"});
 	var board = new createjs.Container().set({name: "board"});
-	
-	
+	var gameOver = new createjs.Container().set({name: "gameOver"});
 	
 	createjs.SceneManager.addScene(menu, function(){
 		//Shown callback
@@ -127,12 +126,25 @@ $(function(){
 	});
 	
 	createjs.SceneManager.addScene(board);
+	createjs.SceneManager.addScene(gameOver, function(){
+		//Shown callback
+		stage.enableMouseOver();
+	}, function(){
+		stage.enableMouseOver(0);
+	});
 	
 	window.addEventListener("keydown", function(e){
+		/*console.log(e);
+		if (e.keyCode == 80){
+			setBoardPaused(!x);
+			x = !x;
+		}*/
+		/*
 		if (e.keyCode == 27 && createjs.SceneManager.activeScene.name == "board" ){
 			createjs.SceneManager.showScene("menu",stage);
-			pauseBoard();
+			pauseBoard(true);
 		}
+		*/
 		e.preventDefault();
 	});
 	
@@ -154,6 +166,7 @@ $(function(){
 			
 		configMenu(menu, $canvas);
 		configBoard(board, $canvas);
+		configGameOver(gameOver, $canvas);
 		
 		createjs.SceneManager.showScene("menu", stage);
 		
@@ -177,19 +190,15 @@ function rand(min,max){ //Inclusive
 
 function showBoard(){
 	createjs.SceneManager.showScene("board", stage);
-	_.each(bloons, function(b){
-		b.SwayHorizontal.setPaused(false);
-		b.AnimateDown.setPaused(false);
-	});
-	timer.timers["timer"].paused = false;
+	setBoardPaused(false);
 }
 
-function pauseBoard(){
+function setBoardPaused(isPaused){
 	_.each(bloons, function(b){
-		b.SwayHorizontal.setPaused(true);
-		b.AnimateDown.setPaused(true);
+		b.SwayHorizontal.setPaused(isPaused);
+		b.AnimateDown.setPaused(isPaused);
 	});
-	timer.timers["timer"].paused = true;
+	timer.timers["timer"].paused = isPaused;
 }
 
 // Game specific functions
@@ -224,29 +233,35 @@ function configBoard(boardContainer, $canvas){
 
 		}
 
-		timer.addComponent(new Timer("timer",{duration:60000, pause:true}, function(n,e){
-			console.log("GET TO TWERK!");
-		}));
+		timer.addComponent(new Timer("timer",{duration:60000, paused:true}));
+				
+		timer.addComponent(new Text("Time Left: " + timer.timers["timer"].getSeconds(), "32px Arial", "#00FFFF", 0, 0));
 		
-		timer.getSeconds = function(){
-			
-			var t = this.timers["timer"];
-			
-			if (!t)
-				return 0 + "";
-			
-			return Math.round(t.duration/1000) + "";
-			
-		}
-		
-		timer.addComponent(new Text("Time Left: " + timer.getSeconds(), "32px Arial", "#00FFFF", 0, 0));
+		timer.on("timerComplete", function(evt){
+			setBoardPaused(true);
+			createjs.SceneManager.showScene("gameOver", stage);
+		});
 		
 		createjs.Ticker.on("tick", function(evt){
-			timer.text = "Time Left: " + timer.getSeconds();
+			timer.text = "Time Left: " + timer.timers["timer"].getSeconds();
 		});
 		
 		boardContainer.addChild(timer);
 		
+}
+
+function configGameOver(gameOverContainer, $canvas){
+	
+	var title = new Entity();
+	title.addComponent(new Text("Game Over!", "bold 90px Arial", "#00FFFF"));
+	title.addComponent(new Position($canvas.width()/2, $canvas.height()/6.28, title.getMeasuredWidth()/2, title.getMeasuredHeight()/2));
+	
+	var exit = new MenuOption("EXIT TO MENU", "64px Arial", "#FF0000", $canvas.width()/2, title.y + 250, function(evt){
+		createjs.SceneManager.showScene("menu",stage);
+	});
+	
+	gameOverContainer.addChild(title);
+	gameOverContainer.addChild(exit);
 }
 
 //Components
@@ -362,38 +377,19 @@ var SwayHorizontal = function(dt){
 	
 }
 
-var AnimateDown = function(dt, height, onDone){
+var AnimateDown = function(dt, height){
 
 	var comp = new Component();
 	
 	comp.added = function(e){
 		var tween = createjs.Tween.get(e).to({
 			y: height
-		}, dt, createjs.Ease.linear);
-		
-		if (_.isFunction(onDone)){
-			tween.call(onDone);
-		}
+		}, dt, createjs.Ease.linear).call(function(t){
+			e.dispatchEvent("offscreen");
+		});
 		
 		e.AnimateDown = tween;
 		
-	}
-	
-	return comp;
-}
-
-var Removeable = function(onRemoved){
-
-	var comp = new Component();
-	
-	comp.added = function(e){
-		e.remove = function(){
-			var parent = e.parent;
-			e.parent.removeChild(e);
-			if (_.isFunction(onRemoved)){
-				onRemoved(e, parent);
-			}
-		}
 	}
 	
 	return comp;
@@ -404,8 +400,10 @@ var Poppable = function(){
 	var comp = new Component();
 	
 	comp.added = function(e){
-		
+
 		e.on("click", function(evt){
+			
+			e.dispatchEvent("popped");
 			
 			createjs.Sound.play("p" + _.sample([1,2,3,4,5]), createjs.Sound.INTERRUPT_NONE);
 			createjs.Tween.removeTweens(evt.target);
@@ -416,16 +414,16 @@ var Poppable = function(){
 				skewY: _.sample([_.random(55,75),_.random(-75,-55)])
 			}]));
 			
-			evt.target.removeAllEventListeners();
-			
 			var toX = _.sample([-3*evt.target.width, $canvas.width()+3*evt.target.width]);
 			var toY = _.random(-3*evt.target.height, $canvas.height()+3*evt.target.height);
 			
 			createjs.Tween.get(evt.target).to({y: toY}, 500, createjs.Ease.elasticInOut);
 			
 			createjs.Tween.get(evt.target).to({x: toX}, 500, createjs.Ease.linear).call(function(tween){
-				evt.target.remove();
+				e.dispatchEvent("offscreen");
 			});
+			
+			evt.remove();
 			
 		});
 		
@@ -434,32 +432,46 @@ var Poppable = function(){
 	return comp;
 }
 
-var Timer = function(name, options, callback){
+var Timer = function(name, options){
 	
 	var comp = new Component();
 	
 	comp.added = function(e){
 	
 		e.timers = e.timers || {};
-		options = _.extend({duration: 1000, paused: false, loop: false},options);
+		options = _.extend({
+			_initialDuration: 1000,
+			duration: 1000,
+			paused: false,
+			loop: false,
+			getSeconds: function(){
+				return Math.round(this.duration/1000);
+			},
+			setPaused: function(isPaused){
+				this.paused = isPaused;
+			},
+			reset: function(){
+				this.duration = this._initialDuration;
+			}
+		},options);
+		
+		options._initialDuration = options.duration;
 		e.timers[name] = options;
-		
-		var origDuration = options.duration;
-		
+				
 		createjs.Ticker.on("tick",function(evt){
-			//Should probably make this remove the tick event on destruction somehow.
-			//console.log(evt);
-			//if (!e.timers[name])
-			//	return;
 				
 			if (!e.timers[name].paused)
 				e.timers[name].duration -= evt.delta;
 			
 			if (e.timers[name].duration <= 0){
 				e.timers[name].duration = 0;
-				callback(name, e);
+				
+				var evt = new createjs.Event("timerComplete");
+				evt.timerName = name;
+				e.dispatchEvent(evt);
+				
 				if (e.timers[name].loop){
-					e.timers[name].duration = origDuration;
+					e.timers[name].reset();
 				}
 			}
 				
@@ -480,20 +492,30 @@ var Bloon = function(container){
 	bloon.addComponent(new Position(_.random(0, $canvas.width()-bloon.width), _.random(-$canvas.height(), 0-bloon.height)));
 	bloon.addComponent(new RandomColor());
 	bloon.addComponent(new SwayHorizontal(_.random(1000,2000)));
-	bloon.addComponent(new AnimateDown(_.random(10000,15000),$canvas.height()+bloon.height,function(tween){
-		bloon.remove();
-	}));
-	bloon.addComponent(new Removeable(function(e, parent){
-		bloons = _.without(bloons, e);
+	bloon.addComponent(new AnimateDown(_.random(10000,15000),$canvas.height()+bloon.height));
+	bloon.addComponent(new Poppable());
+	
+	bloon.on("popped",function(evt){
+			//Add points here
+		console.log("pop!")
+	});
+	
+	bloon.on("offscreen", function(evt){
+		
+		var board = this.parent;
+		
+		bloons = _.without(bloons, this);
+		board.removeChild(this);
+		
 		if (bloons.length < MAX_BLOONS){
-			var newBloon = new Bloon(parent);
+			var newBloon = new Bloon(board);
 			newBloon.SwayHorizontal.setPaused(false);
 			newBloon.AnimateDown.setPaused(false);
 			bloons.push(newBloon);
-			parent.addChild(newBloon);
+			board.addChild(newBloon);
 		}
-	}));
-	bloon.addComponent(new Poppable());
+		
+	});
 	
 	bloon.snapToPixel = true;
 	bloon.SwayHorizontal.setPaused(true);
