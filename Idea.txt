@@ -14,6 +14,12 @@ Calculate clicks per min/sec
 
 Keep high scores?
 
+Points based on drop speed and sway speed summed?
+Bonus multiplier for not missing bloons
+Keep a streak count - +0.5 multiplier per 5 bloon streak. x1.5 5 bloons, x2.0 10 bloons
+
+Hard mode? Misclicks eat points. Bad bloons take points away.
+
 Popping special bloons do special things
 
 Good Bloons
@@ -36,8 +42,12 @@ Toot Bloon: pop it and it makes a fart noise, small brown cloud and pushes other
 Neutral Bloons
 ~~~~~~~~~~~~~~
 Kitty Bloon: Pops and makes a meow sound.
-Weather Bloon: Pops and makes it snow.
+Dog Bloon: Pops and makes a woof sound.
+Cow Bloon: Pops and makes a moo sound.
+Pig Bloon: Pops and makes an oink sound.
+Sheep Bloon: Pops and makes an bleet sound.
 
+Weather Bloon: Pops and makes it snow.
 
 Ryan on Weather Bloons
 1:04:04 PM) Ryan Boutot: weather ballon dude!
@@ -50,3 +60,26 @@ Ryan on Weather Bloons
 (1:04:40 PM) Ryan Boutot: pops them
 (1:04:56 PM) Me: I was thinking just neutral, for some flavor
 (1:04:57 PM) Ryan Boutot: fall = wind, keeps them up in theair
+
+
+Add Achievements
+----------------
+Pop a bloon - Once you pop you can't stop.
+Pop 10 bloons in a single round - Now you're getting it!
+Pop 100 bloons in a single round - Pro Blooner.
+Pop 1000 bloons in a single round - Is this your job?
+
+Add a minute to a round with +Time bloons - Double time!
+Pop a puny blackhole bloon - Phenominal cosmic power! Itty bitty living space.
+
+Get a 5 bloon streak - It's gotta be the shoes.
+Get a 10 bloon streak - He's on fire!
+Get a 15 bloon streak - BOOMSHAKALAKA!
+
+Pop a kitten bloon - Meow.
+Pop a weather bloon - Make it snow!
+Pop a toot bloon - Who cut the cheese?!
+Pop 5 toot bloons in a single round - Beans, beans the magical fruit!
+Pop 5 different animal bloons in a single round - Old McDonald had a farm!
+Pop 5 sheep bloons in a single round - It's Timmy Time!
+Pop an Anvil Bloon by dropping an Anvil on it - Anvils all the way down.
